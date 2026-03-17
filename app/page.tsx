@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { Plus, Users, Calendar, User, CalendarCheck } from "lucide-react";
+import { Plus, Users, Calendar, User, CalendarCheck, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { LoginForm } from "@/components/login-form";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -223,10 +225,23 @@ function Legend({ items }: { items: { color: string; label: string }[] }) {
 // ─── Main App ─────────────────────────────────────────────────────────────────
 
 export default function MeetFlow() {
+  const { isAuthenticated, isLoading, logout } = useAuth();
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
   const [newName, setNewName] = useState("");
   const [open, setOpen] = useState(false);
   const [viewId, setViewId] = useState("xiao-liang");
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">載入中...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
 
   const me = members.find((m) => m.id === "me")!;
   const others = members.filter((m) => m.id !== "me");
@@ -272,12 +287,23 @@ export default function MeetFlow() {
     <div className="min-h-screen bg-background">
       {/* ── Header ── */}
       <header className="border-b bg-background/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-3">
-          <CalendarCheck className="w-5 h-5" />
-          <h1 className="text-lg font-semibold tracking-tight">MeetFlow</h1>
-          <Badge variant="secondary" className="text-xs font-normal">
-            Beta
-          </Badge>
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <CalendarCheck className="w-5 h-5" />
+            <h1 className="text-lg font-semibold tracking-tight">MeetFlow</h1>
+            <Badge variant="secondary" className="text-xs font-normal">
+              Beta
+            </Badge>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+            onClick={logout}
+          >
+            <LogOut className="w-4 h-4" />
+            登出
+          </Button>
         </div>
       </header>
 
